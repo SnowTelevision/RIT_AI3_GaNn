@@ -26,6 +26,18 @@ public class SquareBehavior : MonoBehaviour
                              // if the square jumped over a platform and landed on the platform ahead,
                              // then this number will only increased by 1, which exclude the platform it jumped over)
 
+    /// <summary>
+    /// Some variebles to be monitored
+    /// </summary>
+    public GameObject currentPlatform; // The platform the square currently stepped on
+    public float currentPlatformSlope; // The slope of the current platform
+    public float distanceToEdge; // The distance between the square and the right end of the current platform
+    public GameObject nextPlatform; // The next platform to the one the square currently stepped on
+    public float nextPlatformLength; // The length of the next platform
+    public float nextPlatformAltitudeDiff; // The difference of the y coord between the current platform and the next platform
+    public float nextPlatformslope; // The slope of the next platform
+    public float currendSpeed; // The current speed of the square
+
     // Use this for initialization
     void Start()
     {
@@ -35,6 +47,9 @@ public class SquareBehavior : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        currendSpeed = GetComponent<Rigidbody>().velocity.x;
+        distanceToEdge = currentPlatform.transform.position.x + currentPlatform.transform.localScale.x * 0.5f - transform.position.x; // Calculate 
+                                                             //how far is the square away from the right end of the current platform it stepped on
+        
     }
 }
