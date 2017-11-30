@@ -51,7 +51,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9318b181722a2ed49ae1b02140318098, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  simSpeed: 0
+  simSpeed: 1
   cycleDuration: 0
   fps: 30
   genNum: 0

@@ -8,7 +8,7 @@ public class SimulationManager : MonoBehaviour
     /// This script controls the entire simulation, storing some data which will be shared through the simulation
     /// </summary>
 
-    public float simSpeed; // The speed the simulation runs
+    //public float simSpeed; // The speed the simulation runs
     public float cycleDuration; // The time each generation runs (etc. 10 sec)
     public int fps; // What's the targeting fps for the simulation?
 
@@ -21,7 +21,10 @@ public class SimulationManager : MonoBehaviour
     void Awake()
     {
         Random.InitState(0);
+        QualitySettings.vSyncCount = 0;
         Application.targetFrameRate = fps;
+        //Application.targetFrameRate = -1;
+        //print(Application.targetFrameRate);
     }
 
     // Use this for initialization
@@ -33,6 +36,7 @@ public class SimulationManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Time.timeScale = simSpeed;
+        //Time.timeScale = simSpeed;
+        print(Mathf.RoundToInt(1.0f / Time.deltaTime) + ", " + Application.targetFrameRate + ", " + QualitySettings.vSyncCount);
     }
 }

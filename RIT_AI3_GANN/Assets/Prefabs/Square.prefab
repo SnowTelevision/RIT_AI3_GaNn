@@ -38,7 +38,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1056560030384280}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 11.31, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -97,12 +97,12 @@ Rigidbody2D:
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 1
-  m_LinearDrag: 0
-  m_AngularDrag: 0.05
+  m_LinearDrag: 2
+  m_AngularDrag: 2
   m_GravityScale: 1
   m_Material: {fileID: 0}
   m_Interpolate: 0
-  m_SleepingMode: 1
+  m_SleepingMode: 0
   m_CollisionDetection: 0
   m_Constraints: 4
 --- !u!61 &61695724254469794
@@ -113,7 +113,7 @@ BoxCollider2D:
   m_GameObject: {fileID: 1056560030384280}
   m_Enabled: 1
   m_Density: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: 9fd0e50b7e1f08e4497ccd6332dce32c, type: 2}
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
@@ -153,3 +153,26 @@ MonoBehaviour:
   jumpForce9: 9
   travelDist: 0
   travelPlat: 0
+  currentPlatform: {fileID: 0}
+  currentPlatformSlope: 0
+  distanceToEdge: 0
+  nextPlatform: {fileID: 0}
+  nextPlatformLength: 0
+  nextPlatformAltitudeDiff: 0
+  nextPlatformslope: 0
+  currendSpeed: 0
+  input1: 0
+  input2: 0
+  input3: 0
+  input4: 0
+  output1: 0
+  output2: 0
+  output3: 0
+  output4: 0
+  output5: 0
+  output6: 0
+  output7: 0
+  output8: 0
+  output9: 0
+  output10: 0
+  output11: 0
