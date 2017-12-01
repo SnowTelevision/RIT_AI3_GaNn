@@ -26,6 +26,8 @@ public class SquareBehavior : MonoBehaviour
                              // if the square jumped over a platform and landed on the platform ahead,
                              // then this number will only increased by 1, which exclude the platform it jumped over)
 
+    public float mass; // The weight of the square, used to multiplied with the force when push forward
+    public float gravity; // The scale of the gravity, used to multiplied with the force when jump
     /// <summary>
     /// Some variebles to be monitored
     /// </summary>
@@ -65,6 +67,8 @@ public class SquareBehavior : MonoBehaviour
     void Start()
     {
         basicLayer = new float[4 + 1, 11];
+        mass = GetComponent<Rigidbody2D>().mass;
+        gravity = GetComponent<Rigidbody2D>().gravityScale;
     }
 
     // Update is called once per frame
@@ -74,6 +78,12 @@ public class SquareBehavior : MonoBehaviour
         //distanceToEdge = currentPlatform.transform.position.x + currentPlatform.transform.localScale.x * 0.5f - transform.position.x; // Calculate 
                                                                                                                                       //how far is the square away from the right end of the current platform it stepped on
 
-        GetComponent<Rigidbody2D>().AddForce(transform.right * moveForce, ForceMode2D.Impulse);
+        GetComponent<Rigidbody2D>().AddForce(transform.right * moveForce * mass, ForceMode2D.Impulse);
+    }
+
+    void OnCollisionEnter2D(Collision2D coll)
+    {
+        GetComponent<Rigidbody2D>().AddForce(transform.up * jumpForce9 * mass * gravity, ForceMode2D.Impulse);
+        print("jump");
     }
 }

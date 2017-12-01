@@ -99,7 +99,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDrag: 2
   m_AngularDrag: 2
-  m_GravityScale: 1
+  m_GravityScale: 10
   m_Material: {fileID: 0}
   m_Interpolate: 0
   m_SleepingMode: 0
@@ -153,6 +153,7 @@ MonoBehaviour:
   jumpForce9: 9
   travelDist: 0
   travelPlat: 0
+  mass: 0
   currentPlatform: {fileID: 0}
   currentPlatformSlope: 0
   distanceToEdge: 0

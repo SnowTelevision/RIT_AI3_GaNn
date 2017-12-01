@@ -30,6 +30,9 @@ public class SimulationManager : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+    //    Random.InitState(0);
+    //    QualitySettings.vSyncCount = 0;
+    //    Application.targetFrameRate = fps;
         platformCount = 1;
     }
 
