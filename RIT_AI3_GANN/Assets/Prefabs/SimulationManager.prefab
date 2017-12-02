@@ -51,7 +51,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9318b181722a2ed49ae1b02140318098, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  simSpeed: 1
   cycleDuration: 0
   fps: 30
+  travelDistanceScore: 10
+  travelPlatformScore: 3
+  squareOnPlatformScore: 1
+  populationEachGen: 50
+  square: {fileID: 1056560030384280, guid: d299f86b69095d34495c1d2cfc0fc4e1, type: 2}
+  platform: {fileID: 1704478899546688, guid: 66a0f9b9598fba74b913af68ce535b6c, type: 2}
+  crossOverRate: 0.7
+  mutationRate: 0.003
+  minWeightValue: -10000
+  maxWeightValue: 10000
   genNum: 0

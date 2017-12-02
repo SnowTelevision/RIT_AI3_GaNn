@@ -24,7 +24,7 @@ GameObject:
   - component: {fileID: 61493139875648532}
   - component: {fileID: 114759797117177320}
   m_Layer: 0
-  m_Name: Ground
+  m_Name: Platform
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -130,3 +130,4 @@ MonoBehaviour:
   angleRange: 180
   nextPlatform: {fileID: 0}
   manager: {fileID: 0}
+  currentGenStartTime: 0

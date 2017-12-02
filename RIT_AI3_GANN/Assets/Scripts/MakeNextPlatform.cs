@@ -20,11 +20,13 @@ public class MakeNextPlatform : MonoBehaviour
 
     public GameObject nextPlatform; // The new platform that's been generated
     public SimulationManager manager; // The simulation manager
+    public float currentGenStartTime; // The time the current generation started
 
     // Use this for initialization
     void Start()
     {
         manager = FindObjectOfType<SimulationManager>();
+        currentGenStartTime = SimulationManager.lastGenTime;
     }
 
     // Update is called once per frame
@@ -33,6 +35,11 @@ public class MakeNextPlatform : MonoBehaviour
         if (SimulationManager.platformCount <= 2 && nextPlatform == null)
         {
             MakeTheNextPlatform();
+        }
+
+        if (currentGenStartTime != SimulationManager.lastGenTime) // If a new generation started
+        {
+            Destroy(gameObject);
         }
     }
 

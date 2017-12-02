@@ -20,14 +20,21 @@ public class SquareBehavior : MonoBehaviour
     public int jumpForce8; // 
     public int jumpForce9; // 
 
+    /// <summary>
+    /// Values to calculate fitness score
+    /// </summary>
     public float travelDist; // How far the square travelled
     public float travelPlat; // How many platform the square travelled 
                              // (the platform will only be counted if the square actually lands on it,
                              // if the square jumped over a platform and landed on the platform ahead,
                              // then this number will only increased by 1, which exclude the platform it jumped over)
+    public float timeStayedOnPlatform; // The total time that the square is touching the platforms
+                                       // We don't want the square to jump when it doesn't need to
 
     public float mass; // The weight of the square, used to multiplied with the force when push forward
     public float gravity; // The scale of the gravity, used to multiplied with the force when jump
+    public SimulationManager simManager; // The simulation manager, used to extract genetic informations
+
     /// <summary>
     /// Some variebles to be monitored
     /// </summary>
@@ -40,11 +47,11 @@ public class SquareBehavior : MonoBehaviour
     public float nextPlatformAltitudeDiff; // The difference of the y coord between the current platform and the next platform
     public float nextPlatformslope; // The slope of the next platform
     public float currendSpeed; // The current speed of the square
+    public bool canJump; // If the square is currently touching a platform and can jump
 
     /// <summary>
     /// Data structure for the neural network
     /// </summary>
-
     public float[,] basicLayer; // The default layer structure, if this is good enough then this layer won't change and there won't be more layers
                                 // The x coord will be the index of the input nodes and the y will for output nodes
     public float input1; // The distance between the square and the right end of the current platform normalized to a range between 0-1
@@ -63,12 +70,22 @@ public class SquareBehavior : MonoBehaviour
     public float output10; // Node to trigger jump (with the jumpforce that has the highest output value
     public float output11; // Node to trigger forward impulse
 
+    /// <summary>
+    /// Data structure for the genetic algorithm
+    /// </summary>
+    public float fitnessScore; // The fitness score for this square. It will be calculated after the current gen is ended
+
     // Use this for initialization
     void Start()
     {
         basicLayer = new float[4 + 1, 11];
         mass = GetComponent<Rigidbody2D>().mass;
         gravity = GetComponent<Rigidbody2D>().gravityScale;
+        canJump = false;
+        fitnessScore = 0;
+
+        GeneticCrossOver();
+        GeneticMutation();
     }
 
     // Update is called once per frame
@@ -76,14 +93,99 @@ public class SquareBehavior : MonoBehaviour
     {
         currendSpeed = GetComponent<Rigidbody2D>().velocity.x;
         //distanceToEdge = currentPlatform.transform.position.x + currentPlatform.transform.localScale.x * 0.5f - transform.position.x; // Calculate 
-                                                                                                                                      //how far is the square away from the right end of the current platform it stepped on
+        //how far is the square away from the right end of the current platform it stepped on
 
         GetComponent<Rigidbody2D>().AddForce(transform.right * moveForce * mass, ForceMode2D.Impulse);
     }
 
     void OnCollisionEnter2D(Collision2D coll)
     {
-        GetComponent<Rigidbody2D>().AddForce(transform.up * jumpForce9 * mass * gravity, ForceMode2D.Impulse);
-        print("jump");
+        //GetComponent<Rigidbody2D>().AddForce(transform.up * jumpForce9 * mass * gravity, ForceMode2D.Impulse);
+        //print("jump");
+        canJump = true;
+    }
+
+    void OnCollisionStay2D(Collision2D coll)
+    {
+        canJump = true;
+        timeStayedOnPlatform += Time.fixedDeltaTime;
+    }
+
+    void OnCollisionExit2D(Collision2D coll)
+    {
+        canJump = false;
+    }
+
+    public void GeneticMutation()
+    {
+        for (int i = 0; i < basicLayer.GetLength(0); i++)
+        {
+            for (int j = 0; j < basicLayer.GetLength(1); j++)
+            {
+                if (BetterRandom.betterRandom(0, 100000000) / 100000000f <= SimulationManager.sMutationRate) // Cross over
+                {
+                    basicLayer[i, j] = BetterRandom.betterRandom(SimulationManager.sMinWeightValue, SimulationManager.sMaxWeightValue);
+                }
+            }
+        }
+    }
+
+    public void GeneticCrossOver()
+    {
+        int[] parentIndexes = SelectParents();
+        basicLayer = SimulationManager.lastSquares[parentIndexes[0]].basicLayer; // Copy one parent's neural network layer to the new one's
+
+        for (int i = 0; i < basicLayer.GetLength(0); i++)
+        {
+            for (int j = 0; j < basicLayer.GetLength(1); j++)
+            {
+                if (BetterRandom.betterRandom(0, 1000000) / 1000000f <= SimulationManager.sCrossOverRate) // Cross over
+                {
+                    basicLayer[i, j] = SimulationManager.lastSquares[parentIndexes[1]].basicLayer[i, j];
+                }
+            }
+        }
+    }
+
+    public int[] SelectParents()
+    {
+        int[] parentIndexes = new int[2]; // Index in square array for parent A and B
+
+        float totalFitness = 0;
+        for (int i = 0; i < SimulationManager.lastSquares.Length; i++)
+        {
+            totalFitness += SimulationManager.lastSquares[i].fitnessScore;
+        }
+
+        float parent = BetterRandom.betterRandom(0, Mathf.RoundToInt(totalFitness * 10000)) / 10000f;
+        float selector = 0;
+        for (int i = 0; i < SimulationManager.lastSquares.Length; i++)
+        {
+            selector += SimulationManager.lastSquares[i].fitnessScore;
+            if (selector >= parent)
+            {
+                parentIndexes[0] = i;
+                break;
+            }
+        }
+
+        parentIndexes[1] = parentIndexes[0];
+        while (parentIndexes[1] == parentIndexes[0])
+        {
+            parent = BetterRandom.betterRandom(0, Mathf.RoundToInt(totalFitness * 10000)) / 10000f;
+            selector = 0;
+
+            for (int i = 0; i < SimulationManager.lastSquares.Length; i++)
+            {
+                selector += SimulationManager.lastSquares[i].fitnessScore;
+                if (selector >= parent)
+                {
+                    parentIndexes[1] = i;
+                    break;
+                }
+            }
+        }
+
+        return parentIndexes;
     }
 }
