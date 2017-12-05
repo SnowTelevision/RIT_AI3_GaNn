@@ -53,9 +53,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cycleDuration: 10
   fps: 30
-  travelDistanceScore: 1
-  travelPlatformScore: 3
-  squareOnPlatformScore: 0
+  travelDistanceScore: 30
+  travelPlatformScore: 60
+  squareOnPlatformScore: 1
   populationEachGen: 50
   square: {fileID: 1056560030384280, guid: d299f86b69095d34495c1d2cfc0fc4e1, type: 2}
   platform: {fileID: 1704478899546688, guid: 66a0f9b9598fba74b913af68ce535b6c, type: 2}
@@ -63,4 +63,7 @@ MonoBehaviour:
   mutationRate: 0.03
   minWeightValue: -100
   maxWeightValue: 100
+  tempArray: []
+  bestSquares: []
   genNum: 0
+  lastGenTime: 0

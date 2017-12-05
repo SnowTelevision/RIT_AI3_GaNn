@@ -237,13 +237,18 @@ public class SquareBehavior : MonoBehaviour
 
     public void GeneticCrossOver()
     {
-        if (SimulationManager.lastSquares.Length == 0) // If this is the first generation
+        if (SimulationManager.lastSquares[0] == null) // If this is the first generation
         {
             return;
         }
 
         int[] parentIndexes = SelectParents();
         basicLayer = SimulationManager.lastSquares[parentIndexes[0]].basicLayer; // Copy one parent's neural network layer to the new one's
+
+        //if (parentIndexes[0] < 10)
+        //{
+        //    print(SimulationManager.lastSquares[parentIndexes[0]].fitnessScore);
+        //}
 
         for (int i = 0; i < basicLayer.GetLength(0); i++)
         {
@@ -262,11 +267,12 @@ public class SquareBehavior : MonoBehaviour
         int[] parentIndexes = new int[2]; // Index in square array for parent A and B
 
         float totalFitness = 0;
-        for (int i = 0; i < SimulationManager.lastSquares.Length; i++)
+        for (int i = 0; i < SimulationManager.lastSquares.Length; i++) // Add up total fitness
         {
             totalFitness += SimulationManager.lastSquares[i].fitnessScore;
         }
 
+        // Select first parent
         float parent = BetterRandom.betterRandom(0, Mathf.RoundToInt(totalFitness * 10000)) / 10000f;
         float selector = 0;
         for (int i = 0; i < SimulationManager.lastSquares.Length; i++)
@@ -279,6 +285,7 @@ public class SquareBehavior : MonoBehaviour
             }
         }
 
+        // Select second parent
         parentIndexes[1] = parentIndexes[0];
         while (parentIndexes[1] == parentIndexes[0])
         {

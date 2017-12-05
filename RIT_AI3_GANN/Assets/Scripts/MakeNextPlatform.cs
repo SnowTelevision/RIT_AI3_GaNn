@@ -26,23 +26,23 @@ public class MakeNextPlatform : MonoBehaviour
     void Start()
     {
         manager = FindObjectOfType<SimulationManager>();
-        currentGenStartTime = SimulationManager.lastGenTime;
+        currentGenStartTime = SimulationManager.sLastGenTime;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (currentGenStartTime != SimulationManager.lastGenTime) // If a new generation started
+        if (currentGenStartTime != SimulationManager.sLastGenTime) // If a new generation started
         {
             Destroy(gameObject);
         }
 
-        if (SimulationManager.platformCount <= 2 && nextPlatform == null && currentGenStartTime == SimulationManager.lastGenTime)
+        if (SimulationManager.platformCount <= 2 && nextPlatform == null && currentGenStartTime == SimulationManager.sLastGenTime)
         {
             MakeTheNextPlatform();
         }
 
-        if (nextPlatform != null && nextPlatform.GetComponent<MakeNextPlatform>().nextPlatform == null && currentGenStartTime == SimulationManager.lastGenTime && SimulationManager.leadSquare.transform.position.x >= transform.position.x - transform.localScale.x * 0.5f)
+        if (nextPlatform != null && nextPlatform.GetComponent<MakeNextPlatform>().nextPlatform == null && currentGenStartTime == SimulationManager.sLastGenTime && SimulationManager.leadSquare.transform.position.x >= transform.position.x - transform.localScale.x * 0.5f)
         {
             nextPlatform.GetComponent<MakeNextPlatform>().MakeTheNextPlatform();
         }

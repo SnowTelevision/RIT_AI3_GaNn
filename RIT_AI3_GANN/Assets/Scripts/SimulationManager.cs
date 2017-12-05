@@ -29,14 +29,16 @@ public class SimulationManager : MonoBehaviour
     public static float randomSeedThisSim; // The seed for the default rand() for this simulation
     public static SquareBehavior[] squares; // The array that stores the current generation of squares
     public static SquareBehavior[] lastSquares; // The array that stores the last generation of squares
-    public static SquareBehavior[] bestSquares; // The best squares since the first generation
     public static int platformCount; // Count for how many platforms has been generated
     public static SquareBehavior leadSquare; // The square that is currently taking the lead in this simulation
     public static GameObject mainCamera; // The camera
     public static Vector3 cameraLocalPosi; // The camera local position
+    public SquareBehavior[] tempArray; // Array use to combine lastSquares and bestSquares
 
+    public SquareBehavior[] bestSquares; // The best squares since the first generation
     public int genNum; // The current number of generations for this simulation
-    public static float lastGenTime; // The start time of the current generation
+    public float lastGenTime;
+    public static float sLastGenTime; // The start time of the current generation
 
     void Awake()
     {
@@ -72,7 +74,7 @@ public class SimulationManager : MonoBehaviour
     {
         //Time.timeScale = simSpeed;
         //print(Mathf.RoundToInt(1.0f / Time.deltaTime) + ", " + Application.targetFrameRate + ", " + QualitySettings.vSyncCount);
-        if (Time.time - lastGenTime >= cycleDuration)
+        if (Time.time - sLastGenTime >= cycleDuration)
         {
             NewGen();
         }
@@ -90,14 +92,15 @@ public class SimulationManager : MonoBehaviour
 
     public void NewGen() // The method to start a new generation
     {
-        lastGenTime = Time.time;
+        sLastGenTime = Time.time;
+        lastGenTime = sLastGenTime;
         mainCamera.transform.localPosition = cameraLocalPosi;
         mainCamera.transform.parent = null;
         platformCount = 1;
         genNum++;
         Random.InitState(0);
 
-        for (int i = 0; i < lastSquares.Length; i++) // Wipe out the previous stored squares
+        for (int i = bestSquares.Length; i < lastSquares.Length; i++) // Wipe out the previous stored squares
         {
             if (lastSquares[i] != null)
             {
@@ -105,25 +108,48 @@ public class SimulationManager : MonoBehaviour
             }
         }
 
-        lastSquares = FindObjectsOfType<SquareBehavior>();
+        lastSquares = FindObjectsOfType<SquareBehavior>(); // Fill in the array storing the last generation with the current finished generation
         for (int i = 0; i < lastSquares.Length; i++)
         {
             CalculateFitnessScore(lastSquares[i]);
 
-            for(int j = 0; j < bestSquares.Length; j++) // See if the square is among the best square of all time
+            for (int j = 0; j < bestSquares.Length; j++) // See if the square is among the best square of all time
             {
-                if(lastSquares[i].fitnessScore > bestSquares[j].fitnessScore)
+                if (bestSquares[j] == null)
                 {
-                    bestSquares[j] = lastSquares[i];
+                    bestSquares[j] = Instantiate(lastSquares[i].gameObject).GetComponent<SquareBehavior>();
+                    bestSquares[j].gameObject.SetActive(false);
+                    break;
+                }
+                else if (lastSquares[i].fitnessScore > bestSquares[j].fitnessScore)
+                {
+                    if (bestSquares[j].fitnessScore == lastSquares[i].fitnessScore) // If there is already an instance of this square in the best squares
+                    {
+                        break;
+                    }
+
+                    Destroy(bestSquares[j].gameObject);
+                    bestSquares[j] = Instantiate(lastSquares[i].gameObject).GetComponent<SquareBehavior>();
+                    bestSquares[j].basicLayer = new float[4 + 1, 11];
+                    bestSquares[j].basicLayer = lastSquares[i].basicLayer;
+                    bestSquares[j].gameObject.SetActive(false);
+                    break;
                 }
             }
 
             lastSquares[i].gameObject.SetActive(false);
         }
 
-        Instantiate(platform, Vector3.zero, Quaternion.identity);
+        // Add the best squares and the last squares together
+        tempArray = new SquareBehavior[lastSquares.Length + bestSquares.Length];
+        bestSquares.CopyTo(tempArray, 0);
+        lastSquares.CopyTo(tempArray, bestSquares.Length);
+        lastSquares = new SquareBehavior[lastSquares.Length + bestSquares.Length];
+        tempArray.CopyTo(lastSquares, 0);
 
-        for (int i = 0; i < populationEachGen; i++)
+        Instantiate(platform, Vector3.zero, Quaternion.identity); // Instantiate the new first platform
+
+        for (int i = 0; i < populationEachGen; i++) // Instantiate new squares
         {
             squares[i] = Instantiate(square, Vector3.up * 10, Quaternion.identity).GetComponent<SquareBehavior>();
         }
