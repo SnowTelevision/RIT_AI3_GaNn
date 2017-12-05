@@ -29,7 +29,11 @@ public class SimulationManager : MonoBehaviour
     public static float randomSeedThisSim; // The seed for the default rand() for this simulation
     public static SquareBehavior[] squares; // The array that stores the current generation of squares
     public static SquareBehavior[] lastSquares; // The array that stores the last generation of squares
+    public static SquareBehavior[] bestSquares; // The best squares since the first generation
     public static int platformCount; // Count for how many platforms has been generated
+    public static SquareBehavior leadSquare; // The square that is currently taking the lead in this simulation
+    public static GameObject mainCamera; // The camera
+    public static Vector3 cameraLocalPosi; // The camera local position
 
     public int genNum; // The current number of generations for this simulation
     public static float lastGenTime; // The start time of the current generation
@@ -46,15 +50,19 @@ public class SimulationManager : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-    //    Random.InitState(0);
-    //    QualitySettings.vSyncCount = 0;
-    //    Application.targetFrameRate = fps;
-        platformCount = 1;
+        //    Random.InitState(0);
+        //    QualitySettings.vSyncCount = 0;
+        //    Application.targetFrameRate = fps;
         genNum = 0;
         sCrossOverRate = crossOverRate;
         sMutationRate = mutationRate;
         squares = new SquareBehavior[populationEachGen];
         lastSquares = new SquareBehavior[populationEachGen];
+        bestSquares = new SquareBehavior[Mathf.RoundToInt(populationEachGen * 0.2f)];
+        sMinWeightValue = minWeightValue;
+        sMaxWeightValue = maxWeightValue;
+        mainCamera = FindObjectOfType<Camera>().gameObject;
+        cameraLocalPosi = mainCamera.transform.localPosition;
 
         NewGen();
     }
@@ -64,30 +72,64 @@ public class SimulationManager : MonoBehaviour
     {
         //Time.timeScale = simSpeed;
         //print(Mathf.RoundToInt(1.0f / Time.deltaTime) + ", " + Application.targetFrameRate + ", " + QualitySettings.vSyncCount);
-
-        if(Time.time - lastGenTime >= cycleDuration)
+        if (Time.time - lastGenTime >= cycleDuration)
         {
             NewGen();
+        }
+
+        foreach (SquareBehavior square in squares) // Find out which square is the leading square
+        {
+            if (square.travelDist > leadSquare.travelDist)
+            {
+                leadSquare = square;
+                mainCamera.transform.parent = leadSquare.transform;
+                mainCamera.transform.localPosition = cameraLocalPosi;
+            }
         }
     }
 
     public void NewGen() // The method to start a new generation
     {
         lastGenTime = Time.time;
+        mainCamera.transform.localPosition = cameraLocalPosi;
+        mainCamera.transform.parent = null;
+        platformCount = 1;
+        genNum++;
+        Random.InitState(0);
+
+        for (int i = 0; i < lastSquares.Length; i++) // Wipe out the previous stored squares
+        {
+            if (lastSquares[i] != null)
+            {
+                Destroy(lastSquares[i].gameObject);
+            }
+        }
 
         lastSquares = FindObjectsOfType<SquareBehavior>();
         for (int i = 0; i < lastSquares.Length; i++)
         {
             CalculateFitnessScore(lastSquares[i]);
+
+            for(int j = 0; j < bestSquares.Length; j++) // See if the square is among the best square of all time
+            {
+                if(lastSquares[i].fitnessScore > bestSquares[j].fitnessScore)
+                {
+                    bestSquares[j] = lastSquares[i];
+                }
+            }
+
             lastSquares[i].gameObject.SetActive(false);
         }
 
         Instantiate(platform, Vector3.zero, Quaternion.identity);
 
-        for(int i = 0; i < populationEachGen; i++)
+        for (int i = 0; i < populationEachGen; i++)
         {
-            squares[i] = Instantiate(square, transform.position, Quaternion.identity).GetComponent<SquareBehavior>();
+            squares[i] = Instantiate(square, Vector3.up * 10, Quaternion.identity).GetComponent<SquareBehavior>();
         }
+        leadSquare = squares[0];
+        mainCamera.transform.parent = leadSquare.transform;
+        mainCamera.transform.localPosition = cameraLocalPosi;
     }
 
     public void CalculateFitnessScore(SquareBehavior square)

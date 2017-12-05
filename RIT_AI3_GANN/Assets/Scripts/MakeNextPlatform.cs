@@ -32,14 +32,19 @@ public class MakeNextPlatform : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (SimulationManager.platformCount <= 2 && nextPlatform == null)
+        if (currentGenStartTime != SimulationManager.lastGenTime) // If a new generation started
+        {
+            Destroy(gameObject);
+        }
+
+        if (SimulationManager.platformCount <= 2 && nextPlatform == null && currentGenStartTime == SimulationManager.lastGenTime)
         {
             MakeTheNextPlatform();
         }
 
-        if (currentGenStartTime != SimulationManager.lastGenTime) // If a new generation started
+        if (nextPlatform != null && nextPlatform.GetComponent<MakeNextPlatform>().nextPlatform == null && currentGenStartTime == SimulationManager.lastGenTime && SimulationManager.leadSquare.transform.position.x >= transform.position.x - transform.localScale.x * 0.5f)
         {
-            Destroy(gameObject);
+            nextPlatform.GetComponent<MakeNextPlatform>().MakeTheNextPlatform();
         }
     }
 

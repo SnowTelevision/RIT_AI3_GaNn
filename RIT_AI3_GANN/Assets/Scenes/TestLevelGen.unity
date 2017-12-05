@@ -234,6 +234,11 @@ Prefab:
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 3b70329cb28de4f44b0f34c7af2e2515, type: 2}
   m_IsPrefabParent: 0
+--- !u!1 &630929483 stripped
+GameObject:
+  m_PrefabParentObject: {fileID: 1704478899546688, guid: 66a0f9b9598fba74b913af68ce535b6c,
+    type: 2}
+  m_PrefabInternal: {fileID: 864362927}
 --- !u!1 &712866669
 GameObject:
   m_ObjectHideFlags: 0
@@ -246,6 +251,7 @@ GameObject:
   - component: {fileID: 712866673}
   - component: {fileID: 712866672}
   - component: {fileID: 712866671}
+  - component: {fileID: 712866670}
   m_Layer: 0
   m_Name: TestingGround
   m_TagString: Untagged
@@ -253,6 +259,28 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 0
+--- !u!114 &712866670
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 712866669}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7bc6813e3f63aa742986c1e4d7339315, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  platform: {fileID: 630929483}
+  minLength: 5
+  maxLength: 15
+  heightRange: 3
+  minDistance: 3
+  maxDistance: 8
+  randAngle: 0
+  angleRange: 180
+  nextPlatform: {fileID: 0}
+  manager: {fileID: 0}
+  currentGenStartTime: 0
 --- !u!61 &712866671
 BoxCollider2D:
   m_ObjectHideFlags: 0
