@@ -70,6 +70,7 @@ public class SquareBehavior : MonoBehaviour
     /// Data structure for the genetic algorithm
     /// </summary>
     public float fitnessScore; // The fitness score for this square. It will be calculated after the current gen is ended
+    public float[] layerSample; // Sample to show in the inspector
 
     // Use this for initialization
     void Start()
@@ -227,14 +228,14 @@ public class SquareBehavior : MonoBehaviour
             {
                 if (BetterRandom.betterRandom(0, 100000000) / 100000000f <= SimulationManager.sMutationRate) // Mutate
                 {
-                    basicLayer[i, j] = BetterRandom.betterRandom(SimulationManager.sMinWeightValue, SimulationManager.sMaxWeightValue);
+                    basicLayer[i, j] = BetterRandom.betterRandom(SimulationManager.sMinWeightValue * 10000, SimulationManager.sMaxWeightValue * 10000) / 10000f;
                 }
                 else if (simManager.genNum == 1) // If this is the first generation
                 {
-                    basicLayer[i, j] = BetterRandom.betterRandom(SimulationManager.sMinWeightValue, SimulationManager.sMaxWeightValue);
+                    basicLayer[i, j] = BetterRandom.betterRandom(SimulationManager.sMinWeightValue * 10000, SimulationManager.sMaxWeightValue * 10000) / 10000f;
                 }
 
-                print(id + ", (" + i + ", " + j + "): " + basicLayer[i, j]);
+                //print(id + ", (" + i + ", " + j + "): " + basicLayer[i, j]);
             }
         }
     }
@@ -251,7 +252,7 @@ public class SquareBehavior : MonoBehaviour
 
         if (basicLayer == null)//parentIndexes[0] < 10)
         {
-            print(parentIndexes[0] + ", " + simManager.lastSquares[parentIndexes[0]].fitnessScore);
+            print(parentIndexes[0] + ", " + simManager.lastSquares[parentIndexes[0]].id + ", " + simManager.lastSquares[parentIndexes[0]].basicLayer[0, 0]);
         }
 
         for (int i = 0; i < basicLayer.GetLength(0); i++)
@@ -306,6 +307,31 @@ public class SquareBehavior : MonoBehaviour
                 }
             }
         }
+        /*
+        int whileStopper = 0;
+        while (whileStopper < 10000 && parentIndexes[1] == parentIndexes[0])
+        {
+            parent = BetterRandom.betterRandom(0, Mathf.RoundToInt(totalFitness * 10000)) / 10000f;
+            selector = 0;
+
+            for (int i = 0; i < simManager.lastSquares.Length; i++)
+            {
+                selector += simManager.lastSquares[i].fitnessScore;
+                if (selector >= parent)
+                {
+                    parentIndexes[1] = i;
+                    break;
+                }
+            }
+
+            whileStopper++;
+        }
+        */
+        if (id == 0)
+        {
+            //print(totalFitness);
+        }
+        print(simManager.lastSquares[parentIndexes[0]].id + ", " + simManager.lastSquares[parentIndexes[0]].basicLayer[0, 0] + "; " + simManager.lastSquares[parentIndexes[1]].id + ", " + simManager.lastSquares[parentIndexes[1]].basicLayer[0, 0]);
 
         return parentIndexes;
     }

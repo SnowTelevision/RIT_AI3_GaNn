@@ -59,10 +59,10 @@ MonoBehaviour:
   populationEachGen: 50
   square: {fileID: 1056560030384280, guid: d299f86b69095d34495c1d2cfc0fc4e1, type: 2}
   platform: {fileID: 1704478899546688, guid: 66a0f9b9598fba74b913af68ce535b6c, type: 2}
-  crossOverRate: 0.7
-  mutationRate: 0.01
-  minWeightValue: -30
-  maxWeightValue: 30
+  crossOverRate: 0.5
+  mutationRate: 0.005
+  minWeightValue: -1000
+  maxWeightValue: 1000
   lastSquares: []
   tempArray: []
   bestSquares: []
