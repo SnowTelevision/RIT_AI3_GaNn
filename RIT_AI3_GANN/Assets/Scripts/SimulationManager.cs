@@ -8,7 +8,7 @@ public class SimulationManager : MonoBehaviour
     /// This script controls the entire simulation, storing some data which will be shared through the simulation
     /// </summary>
 
-    //public float simSpeed; // The speed the simulation runs
+    public float simSpeed; // The speed the simulation runs
     public float cycleDuration; // The time each generation runs (etc. 10 sec)
     public int fps; // What's the targeting fps for the simulation?
     public float travelDistanceScore; // Multiplier for the square's travel distance
@@ -72,7 +72,7 @@ public class SimulationManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //Time.timeScale = simSpeed;
+        Time.timeScale = simSpeed;
         //print(Mathf.RoundToInt(1.0f / Time.deltaTime) + ", " + Application.targetFrameRate + ", " + QualitySettings.vSyncCount);
         if (Time.time - sLastGenTime >= cycleDuration)
         {
@@ -107,39 +107,62 @@ public class SimulationManager : MonoBehaviour
                 Destroy(lastSquares[i].gameObject);
             }
         }
-        //for (int i = 0; i < lastSquares.Length; i++) // Wipe out the previous stored squares
-        //{
-        //    if (lastSquares[i] != null)
-        //    {
-        //        Destroy(lastSquares[i].gameObject);
-        //    }
-        //}
 
-        if (genNum == 1)
+        if (genNum == 1) // If it's the first gen
         {
-            lastSquares = FindObjectsOfType<SquareBehavior>();
+            lastSquares = new SquareBehavior[populationEachGen];
         }
         else
         {
             lastSquares = new SquareBehavior[populationEachGen];
             squares.CopyTo(lastSquares, 0);
+            SelectBestSquares();
+
+            for (int i = 0; i < bestSquares.Length; i++) // Replace some last generation squares by the best squares
+            {
+                Destroy(lastSquares[i].gameObject);
+
+                lastSquares[i] = Instantiate(bestSquares[i].gameObject).GetComponent<SquareBehavior>();
+
+                lastSquares[i].basicLayer = new float[4 + 1, 11];
+                copyNeuralLayer(bestSquares[i].basicLayer, lastSquares[i].basicLayer);
+
+                lastSquares[i].gameObject.SetActive(false);
+            }
         }
 
-        for (int i = 0; i < lastSquares.Length; i++)
-        {
-            CalculateFitnessScore(lastSquares[i]);
+        Instantiate(platform, Vector3.zero, Quaternion.identity); // Instantiate the new first platform
 
-            if (genNum == 2)
+        for (int i = 0; i < populationEachGen; i++) // Instantiate new squares
+        {
+            squares[i] = Instantiate(square, Vector3.up * 10, Quaternion.identity).GetComponent<SquareBehavior>();
+            squares[i].id = i;
+        }
+
+        leadSquare = squares[0];
+        mainCamera.transform.parent = leadSquare.transform;
+        mainCamera.transform.localPosition = cameraLocalPosi;
+    }
+
+    public void SelectBestSquares() // See if any square in the current squares is better than any in the best squares
+    {
+        for (int i = 0; i < squares.Length; i++)
+        {
+            CalculateFitnessScore(squares[i]);
+
+            if (genNum == 2) // If it's the second gen
             {
                 for (int j = 0; j < bestSquares.Length; j++) // Fill up the bestSquares for the first time
                 {
                     if (bestSquares[j] == null)
                     {
-                        bestSquares[j] = Instantiate(lastSquares[i].gameObject).GetComponent<SquareBehavior>();
+                        bestSquares[j] = Instantiate(squares[i].gameObject).GetComponent<SquareBehavior>();
+
                         bestSquares[j].basicLayer = new float[4 + 1, 11];
-                        bestSquares[j].basicLayer = lastSquares[i].basicLayer;
+                        copyNeuralLayer(squares[i].basicLayer, bestSquares[j].basicLayer);
+
                         bestSquares[j].gameObject.SetActive(false);
-                        lastSquares[i].gameObject.SetActive(false);
+                        squares[i].gameObject.SetActive(false);
                         break;
                     }
                 }
@@ -156,12 +179,12 @@ public class SimulationManager : MonoBehaviour
                 }
             }
 
-            if (lastSquares[i].fitnessScore > bestSquares[worstBest].fitnessScore)
+            if (squares[i].fitnessScore > bestSquares[worstBest].fitnessScore)
             {
                 bool similar = false;
                 for (int j = 0; j < bestSquares.Length; j++) // See if there is already a square with similar score in it
                 {
-                    if (Mathf.RoundToInt(bestSquares[j].fitnessScore) == Mathf.RoundToInt(lastSquares[i].fitnessScore))
+                    if (Mathf.RoundToInt(bestSquares[j].fitnessScore) == Mathf.RoundToInt(squares[i].fitnessScore))
                     {
                         similar = true;
                     }
@@ -172,9 +195,11 @@ public class SimulationManager : MonoBehaviour
                 }
 
                 Destroy(bestSquares[worstBest].gameObject);
-                bestSquares[worstBest] = Instantiate(lastSquares[i].gameObject).GetComponent<SquareBehavior>();
+
+                bestSquares[worstBest] = Instantiate(squares[i].gameObject).GetComponent<SquareBehavior>();
+
                 bestSquares[worstBest].basicLayer = new float[4 + 1, 11];
-                bestSquares[worstBest].basicLayer = lastSquares[i].basicLayer;
+                copyNeuralLayer(squares[i].basicLayer, bestSquares[worstBest].basicLayer);
 
                 bestSquares[worstBest].layerSample = new float[bestSquares[worstBest].basicLayer.GetLength(0)]; // Show some sample neural links
                 for (int x = 0; x < bestSquares[worstBest].layerSample.Length; x++)
@@ -184,64 +209,20 @@ public class SimulationManager : MonoBehaviour
 
                 bestSquares[worstBest].gameObject.SetActive(false);
             }
-
-            /*
-            for (int j = 0; j < bestSquares.Length; j++) // See if the square is among the best square of all time
-            {
-                if (bestSquares[j] != null && Mathf.RoundToInt(lastSquares[i].fitnessScore) >= Mathf.RoundToInt(bestSquares[j].fitnessScore))
-                {
-                    //if (Mathf.RoundToInt(bestSquares[j].fitnessScore) == Mathf.RoundToInt(lastSquares[i].fitnessScore)) // If there is already an instance of this square in the best squares
-                    //{
-                    //    break;
-                    //}
-
-                    Destroy(bestSquares[j].gameObject);
-                    bestSquares[j] = Instantiate(lastSquares[i].gameObject).GetComponent<SquareBehavior>();
-                    bestSquares[j].basicLayer = new float[4 + 1, 11];
-                    bestSquares[j].basicLayer = lastSquares[i].basicLayer;
-                    bestSquares[j].gameObject.SetActive(false);
-                    break;
-                }
-            }
-            */
-
-            lastSquares[i].gameObject.SetActive(false);
+            
+            squares[i].gameObject.SetActive(false);
         }
+    }
 
-        /*
-        // Add the best squares and the last squares together
-        tempArray = new SquareBehavior[populationEachGen + bestSquares.Length];
-        bestSquares.CopyTo(tempArray, 0);
-        lastSquares.CopyTo(tempArray, bestSquares.Length);
-        //lastSquares.CopyTo(tempArray, 0);
-        //bestSquares.CopyTo(tempArray, lastSquares.Length);
-        lastSquares = new SquareBehavior[populationEachGen + bestSquares.Length];
-        tempArray.CopyTo(lastSquares, 0);
-        */
-
-        if (genNum > 1) // If is not first generation
+    public void copyNeuralLayer(float[,] copyFrom, float[,] copyTo) // Copy neural layer data
+    {
+        for (int x = 0; x < copyTo.GetLength(0); x++)
         {
-            for (int i = 0; i < bestSquares.Length; i++) // Replace some last generation squares by the best squares
+            for (int y = 0; y < copyTo.GetLength(1); y++)
             {
-                Destroy(lastSquares[i].gameObject);
-                lastSquares[i] = Instantiate(bestSquares[i].gameObject).GetComponent<SquareBehavior>();
-                lastSquares[i].basicLayer = new float[4 + 1, 11];
-                lastSquares[i].basicLayer = bestSquares[i].basicLayer;
-                lastSquares[i].gameObject.SetActive(false);
+                copyTo[x, y] = copyFrom[x, y];
             }
         }
-        //bestSquares.CopyTo(lastSquares, 0);
-
-        Instantiate(platform, Vector3.zero, Quaternion.identity); // Instantiate the new first platform
-
-        for (int i = 0; i < populationEachGen; i++) // Instantiate new squares
-        {
-            squares[i] = Instantiate(square, Vector3.up * 10, Quaternion.identity).GetComponent<SquareBehavior>();
-            squares[i].id = i;
-        }
-        leadSquare = squares[0];
-        mainCamera.transform.parent = leadSquare.transform;
-        mainCamera.transform.localPosition = cameraLocalPosi;
     }
 
     public void CalculateFitnessScore(SquareBehavior square)
