@@ -28,7 +28,7 @@ public class SimulationManager : MonoBehaviour
     public static int sMaxWeightValue;
     public static float randomSeedThisSim; // The seed for the default rand() for this simulation
     public static SquareBehavior[] squares; // The array that stores the current generation of squares
-    public static SquareBehavior[] lastSquares; // The array that stores the last generation of squares
+    public SquareBehavior[] lastSquares; // The array that stores the last generation of squares
     public static int platformCount; // Count for how many platforms has been generated
     public static SquareBehavior leadSquare; // The square that is currently taking the lead in this simulation
     public static GameObject mainCamera; // The camera
@@ -107,6 +107,13 @@ public class SimulationManager : MonoBehaviour
                 Destroy(lastSquares[i].gameObject);
             }
         }
+        //for (int i = 0; i < lastSquares.Length; i++) // Wipe out the previous stored squares
+        //{
+        //    if (lastSquares[i] != null)
+        //    {
+        //        Destroy(lastSquares[i].gameObject);
+        //    }
+        //}
 
         lastSquares = FindObjectsOfType<SquareBehavior>(); // Fill in the array storing the last generation with the current finished generation
         for (int i = 0; i < lastSquares.Length; i++)
@@ -121,12 +128,12 @@ public class SimulationManager : MonoBehaviour
                     bestSquares[j].gameObject.SetActive(false);
                     break;
                 }
-                else if (lastSquares[i].fitnessScore > bestSquares[j].fitnessScore)
+                else if (Mathf.RoundToInt(lastSquares[i].fitnessScore) >= Mathf.RoundToInt(bestSquares[j].fitnessScore))
                 {
-                    if (bestSquares[j].fitnessScore == lastSquares[i].fitnessScore) // If there is already an instance of this square in the best squares
-                    {
-                        break;
-                    }
+                    //if (Mathf.RoundToInt(bestSquares[j].fitnessScore) == Mathf.RoundToInt(lastSquares[i].fitnessScore)) // If there is already an instance of this square in the best squares
+                    //{
+                    //    break;
+                    //}
 
                     Destroy(bestSquares[j].gameObject);
                     bestSquares[j] = Instantiate(lastSquares[i].gameObject).GetComponent<SquareBehavior>();
@@ -140,18 +147,28 @@ public class SimulationManager : MonoBehaviour
             lastSquares[i].gameObject.SetActive(false);
         }
 
+        /*
         // Add the best squares and the last squares together
-        tempArray = new SquareBehavior[lastSquares.Length + bestSquares.Length];
+        tempArray = new SquareBehavior[populationEachGen + bestSquares.Length];
         bestSquares.CopyTo(tempArray, 0);
         lastSquares.CopyTo(tempArray, bestSquares.Length);
-        lastSquares = new SquareBehavior[lastSquares.Length + bestSquares.Length];
+        //lastSquares.CopyTo(tempArray, 0);
+        //bestSquares.CopyTo(tempArray, lastSquares.Length);
+        lastSquares = new SquareBehavior[populationEachGen + bestSquares.Length];
         tempArray.CopyTo(lastSquares, 0);
+        */
+
+        if (genNum > 1) // If is not first generation
+        {
+            bestSquares.CopyTo(lastSquares, 0);
+        }
 
         Instantiate(platform, Vector3.zero, Quaternion.identity); // Instantiate the new first platform
 
         for (int i = 0; i < populationEachGen; i++) // Instantiate new squares
         {
             squares[i] = Instantiate(square, Vector3.up * 10, Quaternion.identity).GetComponent<SquareBehavior>();
+            squares[i].id = i;
         }
         leadSquare = squares[0];
         mainCamera.transform.parent = leadSquare.transform;

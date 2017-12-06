@@ -27,6 +27,7 @@ public class SquareBehavior : MonoBehaviour
 
     public float mass; // The weight of the square, used to multiplied with the force when push forward
     public float gravity; // The scale of the gravity, used to multiplied with the force when jump
+    public int id; // ID to help differentiate the squares
     public SimulationManager simManager; // The simulation manager, used to extract genetic informations
 
     /// <summary>
@@ -82,6 +83,7 @@ public class SquareBehavior : MonoBehaviour
         timeStayedOnPlatform = 0;
         fitnessScore = 0;
         jumpForceOutputs = new float[9];
+        simManager = FindObjectOfType<SimulationManager>();
 
         jumpForces = new float[9];
         for (int i = 0; i < jumpForces.Length; i++)
@@ -227,28 +229,30 @@ public class SquareBehavior : MonoBehaviour
                 {
                     basicLayer[i, j] = BetterRandom.betterRandom(SimulationManager.sMinWeightValue, SimulationManager.sMaxWeightValue);
                 }
-                else if (SimulationManager.lastSquares.Length == 0) // If this is the first generation
+                else if (simManager.genNum == 1) // If this is the first generation
                 {
                     basicLayer[i, j] = BetterRandom.betterRandom(SimulationManager.sMinWeightValue, SimulationManager.sMaxWeightValue);
                 }
+
+                print(id + ", (" + i + ", " + j + "): " + basicLayer[i, j]);
             }
         }
     }
 
     public void GeneticCrossOver()
     {
-        if (SimulationManager.lastSquares[0] == null) // If this is the first generation
+        if (simManager.genNum == 1) // If this is the first generation
         {
             return;
         }
 
         int[] parentIndexes = SelectParents();
-        basicLayer = SimulationManager.lastSquares[parentIndexes[0]].basicLayer; // Copy one parent's neural network layer to the new one's
+        basicLayer = simManager.lastSquares[parentIndexes[0]].basicLayer; // Copy one parent's neural network layer to the new one's
 
-        //if (parentIndexes[0] < 10)
-        //{
-        //    print(SimulationManager.lastSquares[parentIndexes[0]].fitnessScore);
-        //}
+        if (basicLayer == null)//parentIndexes[0] < 10)
+        {
+            print(parentIndexes[0] + ", " + simManager.lastSquares[parentIndexes[0]].fitnessScore);
+        }
 
         for (int i = 0; i < basicLayer.GetLength(0); i++)
         {
@@ -256,7 +260,7 @@ public class SquareBehavior : MonoBehaviour
             {
                 if (BetterRandom.betterRandom(0, 1000000) / 1000000f <= SimulationManager.sCrossOverRate) // Cross over
                 {
-                    basicLayer[i, j] = SimulationManager.lastSquares[parentIndexes[1]].basicLayer[i, j];
+                    basicLayer[i, j] = simManager.lastSquares[parentIndexes[1]].basicLayer[i, j];
                 }
             }
         }
@@ -267,17 +271,17 @@ public class SquareBehavior : MonoBehaviour
         int[] parentIndexes = new int[2]; // Index in square array for parent A and B
 
         float totalFitness = 0;
-        for (int i = 0; i < SimulationManager.lastSquares.Length; i++) // Add up total fitness
+        for (int i = 0; i < simManager.lastSquares.Length; i++) // Add up total fitness
         {
-            totalFitness += SimulationManager.lastSquares[i].fitnessScore;
+            totalFitness += simManager.lastSquares[i].fitnessScore;
         }
 
         // Select first parent
         float parent = BetterRandom.betterRandom(0, Mathf.RoundToInt(totalFitness * 10000)) / 10000f;
         float selector = 0;
-        for (int i = 0; i < SimulationManager.lastSquares.Length; i++)
+        for (int i = 0; i < simManager.lastSquares.Length; i++)
         {
-            selector += SimulationManager.lastSquares[i].fitnessScore;
+            selector += simManager.lastSquares[i].fitnessScore;
             if (selector >= parent)
             {
                 parentIndexes[0] = i;
@@ -292,9 +296,9 @@ public class SquareBehavior : MonoBehaviour
             parent = BetterRandom.betterRandom(0, Mathf.RoundToInt(totalFitness * 10000)) / 10000f;
             selector = 0;
 
-            for (int i = 0; i < SimulationManager.lastSquares.Length; i++)
+            for (int i = 0; i < simManager.lastSquares.Length; i++)
             {
-                selector += SimulationManager.lastSquares[i].fitnessScore;
+                selector += simManager.lastSquares[i].fitnessScore;
                 if (selector >= parent)
                 {
                     parentIndexes[1] = i;
