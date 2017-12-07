@@ -24,6 +24,7 @@ public class SquareBehavior : MonoBehaviour
                              // then this number will only increased by 1, which exclude the platform it jumped over)
     public float timeStayedOnPlatform; // The total time that the square is touching the platforms
                                        // We don't want the square to jump when it doesn't need to
+    public float timeBeforeDrop; // The last time the square stayed on a platform
 
     public float mass; // The weight of the square, used to multiplied with the force when push forward
     public float gravity; // The scale of the gravity, used to multiplied with the force when jump
@@ -177,7 +178,6 @@ public class SquareBehavior : MonoBehaviour
                 if (jumpForceNeuronSelected < jumpForceOutputs.Length) // If there is a force neuron triggered
                 {
                     GetComponent<Rigidbody2D>().AddForce(transform.up * jumpForces[jumpForceNeuronSelected], ForceMode2D.Impulse);
-                    //GetComponent<Rigidbody2D>().AddForce(transform.up * 9, ForceMode2D.Impulse);
                 }
             }
         }
@@ -190,8 +190,6 @@ public class SquareBehavior : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D coll)
     {
-        //GetComponent<Rigidbody2D>().AddForce(transform.up * jumpForce9 * mass * gravity, ForceMode2D.Impulse);
-        //print("Colliding: " + coll.transform.name);
         canJump = true;
 
         if (currentPlatform != null && coll.gameObject != currentPlatform.gameObject) // If the square landed on a new platform
@@ -206,6 +204,7 @@ public class SquareBehavior : MonoBehaviour
     {
         canJump = true;
         timeStayedOnPlatform += Time.fixedDeltaTime;
+        timeBeforeDrop = Time.time - SimulationManager.sLastGenTime;
         travelDist = transform.position.x; // Distance only count if the square is touching the platform
         currentPlatform = coll.gameObject.GetComponent<MakeNextPlatform>();
     }
@@ -229,8 +228,6 @@ public class SquareBehavior : MonoBehaviour
                 {
                     basicLayer[i, j] = BetterRandom.betterRandom(SimulationManager.sMinWeightValue * 10000, SimulationManager.sMaxWeightValue * 10000) / 10000f;
                 }
-
-                //print(id + ", (" + i + ", " + j + "): " + basicLayer[i, j]);
             }
         }
     }
@@ -302,31 +299,6 @@ public class SquareBehavior : MonoBehaviour
                 }
             }
         }
-        /*
-        int whileStopper = 0;
-        while (whileStopper < 10000 && parentIndexes[1] == parentIndexes[0])
-        {
-            parent = BetterRandom.betterRandom(0, Mathf.RoundToInt(totalFitness * 10000)) / 10000f;
-            selector = 0;
-
-            for (int i = 0; i < simManager.lastSquares.Length; i++)
-            {
-                selector += simManager.lastSquares[i].fitnessScore;
-                if (selector >= parent)
-                {
-                    parentIndexes[1] = i;
-                    break;
-                }
-            }
-
-            whileStopper++;
-        }
-        */
-        if (id == 0)
-        {
-            //print(totalFitness);
-        }
-        //print(simManager.lastSquares[parentIndexes[0]].id + ", " + simManager.lastSquares[parentIndexes[0]].basicLayer[0, 0] + "; " + simManager.lastSquares[parentIndexes[1]].id + ", " + simManager.lastSquares[parentIndexes[1]].basicLayer[0, 0]);
 
         return parentIndexes;
     }

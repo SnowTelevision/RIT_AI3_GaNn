@@ -21,6 +21,7 @@ public class SimulationManager : MonoBehaviour
     public float mutationRate; // The rate for a value to mutate to a random number
     public int minWeightValue; // The minimum weight value
     public int maxWeightValue; // The maximum weight value
+    public int randomSeed; // The random seed for generating the platforms
 
     public static float sCrossOverRate;
     public static float sMutationRate;
@@ -40,22 +41,18 @@ public class SimulationManager : MonoBehaviour
     public int genNum; // The current number of generations for this simulation
     public float lastGenTime;
     public static float sLastGenTime; // The start time of the current generation
+    public float avgBestTime; // The average of the best squares' live time
 
     void Awake()
     {
-        Random.InitState(0);
+        Random.InitState(randomSeed);
         QualitySettings.vSyncCount = 0;
         Application.targetFrameRate = fps;
-        //Application.targetFrameRate = -1;
-        //print(Application.targetFrameRate);
     }
 
     // Use this for initialization
     void Start()
     {
-        //    Random.InitState(0);
-        //    QualitySettings.vSyncCount = 0;
-        //    Application.targetFrameRate = fps;
         genNum = 0;
         sCrossOverRate = crossOverRate;
         sMutationRate = mutationRate;
@@ -75,7 +72,6 @@ public class SimulationManager : MonoBehaviour
     void Update()
     {
         Time.timeScale = simSpeed;
-        //print(Mathf.RoundToInt(1.0f / Time.deltaTime) + ", " + Application.targetFrameRate + ", " + QualitySettings.vSyncCount);
         if (Time.time - sLastGenTime >= cycleDuration)
         {
             NewGen();
@@ -101,7 +97,7 @@ public class SimulationManager : MonoBehaviour
         mainCamera.transform.parent = null;
         platformCount = 1;
         genNum++;
-        Random.InitState(0);
+        Random.InitState(randomSeed);
 
         for (int i = 0; i < lastSquares.Length; i++) // Wipe out the previous stored squares
         {
@@ -132,6 +128,8 @@ public class SimulationManager : MonoBehaviour
 
                 lastSquares[i].gameObject.SetActive(false);
             }
+
+            IfMakeNewPlatform();
         }
 
         Instantiate(platform, Vector3.zero, Quaternion.identity); // Instantiate the new first platform
@@ -146,6 +144,28 @@ public class SimulationManager : MonoBehaviour
         mainCamera.transform.parent = leadSquare.transform;
         mainCamera.transform.localPosition = cameraLocalPosi;
         neuralNetworkVisual.currentLead = leadSquare;
+    }
+
+    public void IfMakeNewPlatform() // Should we make new platforms? (new random seed)
+    {
+        avgBestTime = 0;
+        for(int i = 0; i < bestSquares.Length; i++) // Add up best fitness scores
+        {
+            avgBestTime += bestSquares[i].timeBeforeDrop;
+        }
+        avgBestTime /= (float)bestSquares.Length; // Take the average
+
+        if (avgBestTime >= cycleDuration * 0.75f) // If the average fitness score is greater than some value then get new random seed
+        {
+            randomSeed = BetterRandom.betterRandom(0, Mathf.RoundToInt(Mathf.Infinity));
+            Random.InitState(randomSeed);
+
+            for (int i = 0; i < bestSquares.Length; i++) // Decrease every best squares' fitness score from the last platform layout
+            {
+                bestSquares[i].timeBeforeDrop = 0;
+                bestSquares[i].fitnessScore *= 0.8f;
+            }
+        }
     }
 
     public void SelectBestSquares() // See if any square in the current squares is better than any in the best squares
@@ -164,6 +184,12 @@ public class SimulationManager : MonoBehaviour
 
                         bestSquares[j].basicLayer = new float[4 + 1, 11];
                         CopyNeuralLayer(squares[i].basicLayer, bestSquares[j].basicLayer);
+
+                        bestSquares[j].layerSample = new float[bestSquares[j].basicLayer.GetLength(0)]; // Show some sample neural links
+                        for (int x = 0; x < bestSquares[j].layerSample.Length; x++)
+                        {
+                            bestSquares[j].layerSample[x] = bestSquares[j].basicLayer[x, 0];
+                        }
 
                         bestSquares[j].gameObject.SetActive(false);
                         squares[i].gameObject.SetActive(false);
@@ -234,8 +260,5 @@ public class SimulationManager : MonoBehaviour
         square.fitnessScore = square.travelDist * travelDistanceScore +
                               square.travelPlat * travelPlatformScore +
                               square.timeStayedOnPlatform * squareOnPlatformScore;
-        //square.fitnessScore = Mathf.Pow(square.travelDist, 2) * travelDistanceScore +
-        //                      square.travelPlat * travelPlatformScore +
-        //                      square.timeStayedOnPlatform * squareOnPlatformScore;
     }
 }
