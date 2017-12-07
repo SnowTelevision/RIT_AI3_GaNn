@@ -1,0 +1,5 @@
+1: If it's the first gen, create 50 squares with randome NN
+
+2: If it's the second gen, first fill in the best squares with 10 last squares (copy), then for the rest of the last squares if one of them is better than the worst square in the best squares, replace (copy) the worst square with it.
+
+3: If it's more than the second gen, first destroy all the squares in last squares (since the best squares are separate copies, they won't be destroyed), then put all current squares in the last squares. Then if there is any square in the new last squares better than the worst squares in the best squares, replace (copy) the worst square with it. Then replace some new last squares with the best squares.

@@ -145,7 +145,7 @@ public class SquareBehavior : MonoBehaviour
         output11 = (1f / (1f + Mathf.Pow((float)Math.E, output11))); // Plug into the Sigmoid function
         jumpForceNeuronSelected = 0;
 
-        if (output10 >= 0.5f)
+        if (output10 >= 0.5f) // If jump, calculate which force is used for jump
         {
             for (int y = 0; y < jumpForceOutputs.Length; y++)
             {
@@ -157,11 +157,6 @@ public class SquareBehavior : MonoBehaviour
                 }
                 jumpForceOutputs[y] += basicLayer[basicLayer.GetLength(0) - 1, y]; // Adding bias
                 jumpForceOutputs[y] = (1f / (1f + Mathf.Pow((float)Math.E, jumpForceOutputs[y]))); // Plug into the Sigmoid function
-
-                //if (SimulationManager.squares[0].gameObject == gameObject)
-                //{
-                //    print(jumpForceOutputs[y]);
-                //}
 
                 if (jumpForceOutputs[y] >= jumpForceOutputs[jumpForceNeuronSelected])
                 {

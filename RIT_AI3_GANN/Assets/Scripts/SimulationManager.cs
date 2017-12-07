@@ -33,6 +33,7 @@ public class SimulationManager : MonoBehaviour
     public static SquareBehavior leadSquare; // The square that is currently taking the lead in this simulation
     public static GameObject mainCamera; // The camera
     public static Vector3 cameraLocalPosi; // The camera local position
+    public NeuralNetworkVisualizer neuralNetworkVisual; // The visualization of the neural network of the leading square
     public SquareBehavior[] tempArray; // Array use to combine lastSquares and bestSquares
 
     public SquareBehavior[] bestSquares; // The best squares since the first generation
@@ -65,6 +66,7 @@ public class SimulationManager : MonoBehaviour
         sMaxWeightValue = maxWeightValue;
         mainCamera = FindObjectOfType<Camera>().gameObject;
         cameraLocalPosi = mainCamera.transform.localPosition;
+        neuralNetworkVisual = FindObjectOfType<NeuralNetworkVisualizer>();
 
         NewGen();
     }
@@ -86,6 +88,7 @@ public class SimulationManager : MonoBehaviour
                 leadSquare = square;
                 mainCamera.transform.parent = leadSquare.transform;
                 mainCamera.transform.localPosition = cameraLocalPosi;
+                neuralNetworkVisual.currentLead = leadSquare;
             }
         }
     }
@@ -125,7 +128,7 @@ public class SimulationManager : MonoBehaviour
                 lastSquares[i] = Instantiate(bestSquares[i].gameObject).GetComponent<SquareBehavior>();
 
                 lastSquares[i].basicLayer = new float[4 + 1, 11];
-                copyNeuralLayer(bestSquares[i].basicLayer, lastSquares[i].basicLayer);
+                CopyNeuralLayer(bestSquares[i].basicLayer, lastSquares[i].basicLayer);
 
                 lastSquares[i].gameObject.SetActive(false);
             }
@@ -142,6 +145,7 @@ public class SimulationManager : MonoBehaviour
         leadSquare = squares[0];
         mainCamera.transform.parent = leadSquare.transform;
         mainCamera.transform.localPosition = cameraLocalPosi;
+        neuralNetworkVisual.currentLead = leadSquare;
     }
 
     public void SelectBestSquares() // See if any square in the current squares is better than any in the best squares
@@ -159,7 +163,7 @@ public class SimulationManager : MonoBehaviour
                         bestSquares[j] = Instantiate(squares[i].gameObject).GetComponent<SquareBehavior>();
 
                         bestSquares[j].basicLayer = new float[4 + 1, 11];
-                        copyNeuralLayer(squares[i].basicLayer, bestSquares[j].basicLayer);
+                        CopyNeuralLayer(squares[i].basicLayer, bestSquares[j].basicLayer);
 
                         bestSquares[j].gameObject.SetActive(false);
                         squares[i].gameObject.SetActive(false);
@@ -199,7 +203,7 @@ public class SimulationManager : MonoBehaviour
                 bestSquares[worstBest] = Instantiate(squares[i].gameObject).GetComponent<SquareBehavior>();
 
                 bestSquares[worstBest].basicLayer = new float[4 + 1, 11];
-                copyNeuralLayer(squares[i].basicLayer, bestSquares[worstBest].basicLayer);
+                CopyNeuralLayer(squares[i].basicLayer, bestSquares[worstBest].basicLayer);
 
                 bestSquares[worstBest].layerSample = new float[bestSquares[worstBest].basicLayer.GetLength(0)]; // Show some sample neural links
                 for (int x = 0; x < bestSquares[worstBest].layerSample.Length; x++)
@@ -214,7 +218,7 @@ public class SimulationManager : MonoBehaviour
         }
     }
 
-    public void copyNeuralLayer(float[,] copyFrom, float[,] copyTo) // Copy neural layer data
+    public void CopyNeuralLayer(float[,] copyFrom, float[,] copyTo) // Copy neural layer data
     {
         for (int x = 0; x < copyTo.GetLength(0); x++)
         {
