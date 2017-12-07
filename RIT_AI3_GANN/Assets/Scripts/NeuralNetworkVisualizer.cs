@@ -85,19 +85,17 @@ public class NeuralNetworkVisualizer : MonoBehaviour
                             outputNodes[y].material.color = outputWalkColor;
                         }
                     }
+                }
 
-                    //neuralConnections[x, y].startWidth = Mathf.Clamp(Mathf.Abs(currentLead.basicLayer[x, y]) / simManager.maxWeightValue, 0.1f, 1); // Set line width
-                    //neuralConnections[x, y].endWidth = Mathf.Clamp(Mathf.Abs(currentLead.basicLayer[x, y]) / simManager.maxWeightValue, 0.1f, 1);
-                    neuralConnections[x, y].startWidth = Mathf.Abs(currentLead.basicLayer[x, y]) / simManager.maxWeightValue; // Set line width
-                    neuralConnections[x, y].endWidth = Mathf.Abs(currentLead.basicLayer[x, y]) / simManager.maxWeightValue;
-                    if (currentLead.basicLayer[x, y] >= 0) // Set line color, positive weight give green color, negative weight give red color
-                    {
-                        neuralConnections[x, y].material.SetColor("_EmissionColor", Color.green);
-                    }
-                    else
-                    {
-                        neuralConnections[x, y].material.SetColor("_EmissionColor", Color.red);
-                    }
+                neuralConnections[x, y].startWidth = Mathf.Abs(currentLead.basicLayer[x, y]) / simManager.maxWeightValue; // Set line width
+                neuralConnections[x, y].endWidth = Mathf.Abs(currentLead.basicLayer[x, y]) / simManager.maxWeightValue;
+                if (currentLead.basicLayer[x, y] >= 0) // Set line color, positive weight give green color, negative weight give red color
+                {
+                    neuralConnections[x, y].material.SetColor("_EmissionColor", Color.green);
+                }
+                else
+                {
+                    neuralConnections[x, y].material.SetColor("_EmissionColor", Color.red);
                 }
             }
         }
