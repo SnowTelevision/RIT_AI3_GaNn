@@ -34,6 +34,7 @@ public class NeuralNetworkVisualizer : MonoBehaviour
         if (currentLead != null)
         {
             UpdateNeuralNetwork();
+            MoveLinks();
         }
     }
 
@@ -53,9 +54,9 @@ public class NeuralNetworkVisualizer : MonoBehaviour
                         outputForceColor.a = currentLead.jumpForceOutputs[y];
                         outputNodes[y].material.color = outputForceColor;
                     }
-                    else if(y == currentLead.jumpForceOutputs.Length) // Set alpha for trigger jump
+                    else if (y == currentLead.jumpForceOutputs.Length) // Set alpha for trigger jump
                     {
-                        if(currentLead.output10 >= 0.5f) // If this node is triggered
+                        if (currentLead.output10 >= 0.5f) // If this node is triggered
                         {
                             outputJumpColor.a = 1;
                             outputNodes[y].material.color = outputJumpColor;
@@ -80,19 +81,31 @@ public class NeuralNetworkVisualizer : MonoBehaviour
                         }
                     }
 
+                    //neuralConnections[x, y].startWidth = Mathf.Clamp(Mathf.Abs(currentLead.basicLayer[x, y]) / simManager.maxWeightValue, 0.1f, 1); // Set line width
+                    //neuralConnections[x, y].endWidth = Mathf.Clamp(Mathf.Abs(currentLead.basicLayer[x, y]) / simManager.maxWeightValue, 0.1f, 1);
                     neuralConnections[x, y].startWidth = Mathf.Abs(currentLead.basicLayer[x, y]) / simManager.maxWeightValue; // Set line width
                     neuralConnections[x, y].endWidth = Mathf.Abs(currentLead.basicLayer[x, y]) / simManager.maxWeightValue;
                     if (currentLead.basicLayer[x, y] >= 0) // Set line color, positive weight give green color, negative weight give red color
                     {
-                        neuralConnections[x, y].startColor = Color.green;
-                        neuralConnections[x, y].endColor = Color.green;
+                        neuralConnections[x, y].material.SetColor("_EmissionColor", Color.green);
                     }
                     else
                     {
-                        neuralConnections[x, y].startColor = Color.red;
-                        neuralConnections[x, y].endColor = Color.red;
+                        neuralConnections[x, y].material.SetColor("_EmissionColor", Color.red);
                     }
                 }
+            }
+        }
+    }
+
+    public void MoveLinks()
+    {
+        for (int x = 0; x < neuralConnections.GetLength(0); x++)
+        {
+            for (int y = 0; y < neuralConnections.GetLength(1); y++)
+            {
+                neuralConnections[x, y].SetPosition(0, inputNodes[x].transform.position);
+                neuralConnections[x, y].SetPosition(1, outputNodes[y].transform.position);
             }
         }
     }
@@ -105,8 +118,6 @@ public class NeuralNetworkVisualizer : MonoBehaviour
             for (int y = 0; y < neuralConnections.GetLength(1); y++)
             {
                 neuralConnections[x, y] = Instantiate(neuralConnection).GetComponent<LineRenderer>();
-                neuralConnections[x, y].SetPosition(0, inputNodes[x].transform.position);
-                neuralConnections[x, y].SetPosition(1, outputNodes[y].transform.position);
             }
         }
     }

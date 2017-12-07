@@ -326,7 +326,7 @@ public class SquareBehavior : MonoBehaviour
         {
             //print(totalFitness);
         }
-        print(simManager.lastSquares[parentIndexes[0]].id + ", " + simManager.lastSquares[parentIndexes[0]].basicLayer[0, 0] + "; " + simManager.lastSquares[parentIndexes[1]].id + ", " + simManager.lastSquares[parentIndexes[1]].basicLayer[0, 0]);
+        //print(simManager.lastSquares[parentIndexes[0]].id + ", " + simManager.lastSquares[parentIndexes[0]].basicLayer[0, 0] + "; " + simManager.lastSquares[parentIndexes[1]].id + ", " + simManager.lastSquares[parentIndexes[1]].basicLayer[0, 0]);
 
         return parentIndexes;
     }
