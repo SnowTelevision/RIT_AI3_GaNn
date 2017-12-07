@@ -40,6 +40,11 @@ public class NeuralNetworkVisualizer : MonoBehaviour
 
     public void UpdateNeuralNetwork()
     {
+        if (currentLead.inputs.Length == 0)
+        {
+            return;
+        }
+
         for (int x = 0; x < neuralConnections.GetLength(0); x++)
         {
             inputNodeColor.a = currentLead.inputs[x];
